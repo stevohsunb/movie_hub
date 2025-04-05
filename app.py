@@ -1,5 +1,6 @@
 import os
 import streamlit as st
+import mysql
 import mysql.connector
 from db_connection import get_db_connection
 from mysql.connector.cursor import MySQLCursorDict
