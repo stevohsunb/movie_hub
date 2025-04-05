@@ -2,6 +2,7 @@ import streamlit as st
 import mysql.connector
 from db_connection import get_db_connection
 from mysql.connector.cursor import MySQLCursorDict
+
 # Set page config
 st.set_page_config(page_title="MovieVerse", page_icon="🎬", layout="wide")
 
@@ -85,7 +86,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Fetching movies data from the database
-
 def fetch_movies(sort_option, search_query):
     conn = get_db_connection()
     if conn is None:
@@ -93,7 +93,6 @@ def fetch_movies(sort_option, search_query):
         return []
 
     cursor = conn.cursor(cursor_class=MySQLCursorDict)
-
     query = "SELECT * FROM movies WHERE title LIKE %s ORDER BY %s"
     cursor.execute(query, (f"%{search_query}%", sort_option))
     movies = cursor.fetchall()
@@ -101,7 +100,6 @@ def fetch_movies(sort_option, search_query):
     conn.close()
     return movies
 
-# Other parts of user_app.py
 # Updating views count in the database
 def update_views(movie_id):
     conn = get_db_connection()
@@ -124,7 +122,7 @@ def update_likes(movie_id):
 st.markdown('<div class="title">Welcome to MovieVerse</div>', unsafe_allow_html=True)
 
 # Admin Panel Link
-st.markdown('<div class="admin-link"><a href="http://localhost:8501/app" target="_blank">Go to Admin Panel</a></div>', unsafe_allow_html=True)
+st.markdown('<div class="admin-link"><a href="https://movie-universe.streamlit.app/?script=app.py" target="_blank">Go to Admin Panel</a></div>', unsafe_allow_html=True)
 
 # Search bar to search movies
 search_query = st.text_input("Search for a movie:", placeholder="Enter movie title...")
