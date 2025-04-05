@@ -2,17 +2,25 @@ import mysql.connector
 import os
 
 def get_db_connection():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",  # Replace with your actual password
-        database="movieverse_db",
-        connection_timeout=10  # Set a timeout for the connection
-    )
-    ensure_table_columns_exist(conn)  # Ensure all columns exist before returning connection
-    return conn
+    try:
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST", "localhost"),  # Use environment variables
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),  # Replace with your actual password
+            database=os.getenv("DB_NAME", "movieverse_db"),
+            connection_timeout=10  # Set a timeout for the connection
+        )
+        ensure_table_columns_exist(conn)  # Ensure all columns exist before returning connection
+        return conn
+    except mysql.connector.Error as err:
+        print(f"Error: {err}")
+        return None
 
 def ensure_table_columns_exist(conn):
+    if conn is None:
+        print("No connection available to ensure table columns.")
+        return
+
     cursor = conn.cursor()
 
     # Define the required columns and their data types
@@ -56,4 +64,5 @@ def ensure_table_columns_exist(conn):
 
 # Run the function to ensure the database is properly structured
 conn = get_db_connection()
-conn.close()
+if conn:
+    conn.close()
