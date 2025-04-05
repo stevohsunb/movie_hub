@@ -2,20 +2,43 @@ import os
 import mysql
 import mysql.connector
 from mysql.connector.cursor import MySQLCursorDict
+
 def get_db_connection():
-    conn = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="",  # Replace with your actual password
-        database="movieverse_db",
-        connection_timeout=10  # Set a timeout for the connection
-    )
+    """
+    Establish a database connection using environment variables for configuration.
+    Ensures that the required table columns exist.
+    Returns the database connection object or None if the connection fails.
+    """
+    try:
+        # Debug prints to verify environment variables
+        print("DB_HOST:", os.getenv("DB_HOST", "localhost"))
+        print("DB_USER:", os.getenv("DB_USER", "root"))
+        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", ""))
+        print("DB_NAME:", os.getenv("DB_NAME", "movieverse_db"))
+
+        conn = mysql.connector.connect(
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),
+            database=os.getenv("DB_NAME", "movieverse_db"),
+            connection_timeout=20  # Increased the timeout for the connection
+        )
         ensure_table_columns_exist(conn)
         return conn
     except mysql.connector.Error as err:
         print(f"Error: {err}")
         print("Check if the MySQL server is running and the environment variables are set correctly.")
         return None
+
+def ensure_table_columns_exist(conn):
+    """
+    Ensures that the required columns exist in the 'movies' table.
+    Adds any missing columns to the table.
+    """
+    if conn is None:
+        print("No connection available to ensure table columns.")
+        return
+
     cursor = conn.cursor()
     
     required_columns = {
@@ -58,4 +81,3 @@ if __name__ == "__main__":
     conn = get_db_connection()
     if conn:
         conn.close()
-      
