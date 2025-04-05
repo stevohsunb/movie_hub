@@ -122,7 +122,7 @@ def update_likes(movie_id):
 st.markdown('<div class="title">Welcome to MovieVerse</div>', unsafe_allow_html=True)
 
 # Admin Panel Link
-st.markdown('<div class="admin-link"><a href="https://movie-universe.streamlit.app/?script=app.py" target="_blank">Go to Admin Panel</a></div>', unsafe_allow_html=True)
+st.markdown('<div class="admin-link"><a href="https://movie-universe-2.streamlit.app/" target="_blank">Go to Admin Panel</a></div>', unsafe_allow_html=True)
 
 # Search bar to search movies
 search_query = st.text_input("Search for a movie:", placeholder="Enter movie title...")
