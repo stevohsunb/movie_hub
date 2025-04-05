@@ -88,7 +88,6 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Admin login function
-  # Ensure this import is correct
 def login():
     st.title("Admin Login")
     
@@ -97,20 +96,24 @@ def login():
     
     if st.button("Login"):
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)  # Use dictionary=True instead of cursor_class
-        
-        query = "SELECT * FROM admins WHERE username=%s AND password=%s"
-        cursor.execute(query, (username, password))
-        user = cursor.fetchone()
+        if conn:
+            cursor = conn.cursor(dictionary=True)  # Use dictionary=True instead of cursor_class
 
-        if user:
-            st.session_state["logged_in"] = True
-            st.success("Login successful!")
-            st.rerun()
+            query = "SELECT * FROM admins WHERE username=%s AND password=%s"
+            cursor.execute(query, (username, password))
+            user = cursor.fetchone()
+
+            if user:
+                st.session_state["logged_in"] = True
+                st.success("Login successful!")
+                st.rerun()
+            else:
+                st.error("Invalid username or password")
+
+            cursor.close()
+            conn.close()
         else:
-            st.error("Invalid username or password")
-        
-        conn.close()
+            st.error("Failed to connect to the database. Please check your connection settings.")
 
 # Show login page if user is not logged in
 if "logged_in" not in st.session_state:
@@ -130,12 +133,17 @@ if st.session_state.get("logged_in"):
     # Fetch movies from the database
     def fetch_movies():
         conn = get_db_connection()
-        cursor = conn.cursor(cursor_class=MySQLCursorDict)
-        cursor.execute("SELECT * FROM movies ORDER BY upload_date DESC")
-        movies = cursor.fetchall()
-        conn.close()
-        return movies
-    
+        if conn:
+            cursor = conn.cursor(cursor_class=MySQLCursorDict)
+            cursor.execute("SELECT * FROM movies ORDER BY upload_date DESC")
+            movies = cursor.fetchall()
+            cursor.close()
+            conn.close()
+            return movies
+        else:
+            st.error("Failed to connect to the database. Please check your connection settings.")
+            return []
+
     # Fetch movies data
     movies = fetch_movies()
 
@@ -169,32 +177,35 @@ if st.session_state.get("logged_in"):
         if submit_button:
             if title and description and (uploaded_file or video_url):
                 conn = get_db_connection()
-                cursor = conn.cursor()
+                if conn:
+                    cursor = conn.cursor()
 
-                # Ensure the movies directory exists
-                if uploaded_file:
-                    # Check if the directory exists, if not, create it
-                    movies_dir = "movies"
-                    if not os.path.exists(movies_dir):
-                        os.makedirs(movies_dir)
+                    # Ensure the movies directory exists
+                    if uploaded_file:
+                        # Check if the directory exists, if not, create it
+                        movies_dir = "movies"
+                        if not os.path.exists(movies_dir):
+                            os.makedirs(movies_dir)
 
-                    # Save the video file in the 'movies/' directory
-                    video_path = os.path.join(movies_dir, uploaded_file.name)
-                    with open(video_path, "wb") as f:
-                        f.write(uploaded_file.getbuffer())
+                        # Save the video file in the 'movies/' directory
+                        video_path = os.path.join(movies_dir, uploaded_file.name)
+                        with open(video_path, "wb") as f:
+                            f.write(uploaded_file.getbuffer())
 
-                    query = "INSERT INTO movies (title, description, video_url, upload_date, hidden) VALUES (%s, %s, %s, NOW(), %s)"
-                    cursor.execute(query, (title, description, video_path, False))  # Store local file path
+                        query = "INSERT INTO movies (title, description, video_url, upload_date, hidden) VALUES (%s, %s, %s, NOW(), %s)"
+                        cursor.execute(query, (title, description, video_path, False))  # Store local file path
 
-                elif video_url:
-                    query = "INSERT INTO movies (title, description, video_url, upload_date, hidden) VALUES (%s, %s, %s, NOW(), %s)"
-                    cursor.execute(query, (title, description, video_url, False))  # Store URL
-                
-                conn.commit()
-                cursor.close()
-                conn.close()
-                st.success("Movie added successfully!")
-                st.rerun()
+                    elif video_url:
+                        query = "INSERT INTO movies (title, description, video_url, upload_date, hidden) VALUES (%s, %s, %s, NOW(), %s)"
+                        cursor.execute(query, (title, description, video_url, False))  # Store URL
+                    
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    st.success("Movie added successfully!")
+                    st.rerun()
+                else:
+                    st.error("Failed to connect to the database. Please check your connection settings.")
             else:
                 st.error("All fields are required!")
 
@@ -217,16 +228,19 @@ if st.session_state.get("logged_in"):
             if st.button("Update Movie", key="update_button"):
                 if new_title and new_description and new_video_url:
                     conn = get_db_connection()
-                    cursor = conn.cursor()
-                    update_query = """UPDATE movies 
-                                    SET title=%s, description=%s, video_url=%s, hidden=%s
-                                    WHERE id=%s"""
-                    cursor.execute(update_query, (new_title, new_description, new_video_url, hide_movie, selected_movie['id']))
-                    conn.commit()
-                    cursor.close()
-                    conn.close()
-                    st.success("Movie updated successfully!")
-                    st.rerun()
+                    if conn:
+                        cursor = conn.cursor()
+                        update_query = """UPDATE movies 
+                                        SET title=%s, description=%s, video_url=%s, hidden=%s
+                                        WHERE id=%s"""
+                        cursor.execute(update_query, (new_title, new_description, new_video_url, hide_movie, selected_movie['id']))
+                        conn.commit()
+                        cursor.close()
+                        conn.close()
+                        st.success("Movie updated successfully!")
+                        st.rerun()
+                    else:
+                        st.error("Failed to connect to the database. Please check your connection settings.")
                 else:
                     st.error("All fields are required!")
 
@@ -241,11 +255,14 @@ if st.session_state.get("logged_in"):
             
             if st.button("Delete Movie", key="delete_button"):
                 conn = get_db_connection()
-                cursor = conn.cursor()
-                delete_query = "DELETE FROM movies WHERE id=%s"
-                cursor.execute(delete_query, (selected_movie['id'],))
-                conn.commit()
-                cursor.close()
-                conn.close()
-                st.success("Movie deleted successfully!")
-                st.rerun()
+                if conn:
+                    cursor = conn.cursor()
+                    delete_query = "DELETE FROM movies WHERE id=%s"
+                    cursor.execute(delete_query, (selected_movie['id'],))
+                    conn.commit()
+                    cursor.close()
+                    conn.close()
+                    st.success("Movie deleted successfully!")
+                    st.rerun()
+                else:
+                    st.error("Failed to connect to the database. Please check your connection settings.")
