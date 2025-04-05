@@ -2,7 +2,10 @@ import os
 import streamlit as st
 import mysql.connector
 from db_connection import get_db_connection
-st.set_page_config(page_title="application", page_icon="🎬", layout="wide")
+from mysql.connector.cursor import MySQLCursorDict
+
+st.set_page_config(page_title="Admin Panel", page_icon="🎬", layout="wide")
+
 # Inject custom CSS styles for better visuals
 st.markdown("""
     <style>
@@ -10,7 +13,6 @@ st.markdown("""
             background-color: #f0f4f8;
             font-family: 'Arial', sans-serif;
         }
-
         .title {
             color: #4CAF50;
             text-align: center;
@@ -18,14 +20,12 @@ st.markdown("""
             margin-top: 30px;
             font-weight: bold;
         }
-
         .subheader {
             color: #333;
             font-size: 2em;
             margin-top: 20px;
             font-weight: bold;
         }
-
         .form-container {
             background-color: #ffffff;
             padding: 25px;
@@ -33,7 +33,6 @@ st.markdown("""
             border-radius: 8px;
             box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
         }
-
         .button-like {
             background-color: #4CAF50;
             color: white;
@@ -43,17 +42,14 @@ st.markdown("""
             cursor: pointer;
             margin-top: 20px;
         }
-
         .button-like:hover {
             background-color: #45a049;
         }
-
         .admin-link {
             text-align: center;
             font-size: 1.2em;
             margin-top: 25px;
         }
-
         .movie-entry {
             background-color: #f1f8f1;
             border-radius: 8px;
@@ -62,35 +58,29 @@ st.markdown("""
             border-left: 6px solid #4CAF50;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-
         .movie-title {
             color: #4CAF50;
             font-size: 1.9em;
             font-weight: bold;
         }
-
         .movie-details {
             margin-top: 8px;
             color: #555;
         }
-
         .movie-description {
             margin-top: 15px;
             color: #444;
         }
-
         .expander-header {
             color: #4CAF50;
             font-weight: bold;
         }
-
         .stButton>button {
             background-color: #4CAF50;
             color: white;
             border-radius: 5px;
             padding: 12px 18px;
         }
-
         .stButton>button:hover {
             background-color: #45a049;
         }
@@ -106,7 +96,7 @@ def login():
     
     if st.button("Login"):
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_class=MySQLCursorDict)
         
         query = "SELECT * FROM admins WHERE username=%s AND password=%s"
         cursor.execute(query, (username, password))
@@ -139,7 +129,7 @@ if st.session_state.get("logged_in"):
     # Fetch movies from the database
     def fetch_movies():
         conn = get_db_connection()
-        cursor = conn.cursor(dictionary=True)
+        cursor = conn.cursor(cursor_class=MySQLCursorDict)
         cursor.execute("SELECT * FROM movies ORDER BY upload_date DESC")
         movies = cursor.fetchall()
         conn.close()
