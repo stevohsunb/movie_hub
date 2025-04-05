@@ -1,26 +1,31 @@
-import streamlit as st
-import mysql.connector
+import os
 from mysql.connector.cursor import MySQLCursorDict
 
 def get_db_connection():
     """
-    Establish a database connection using Streamlit secrets.
+    Establish a database connection using environment variables for configuration.
     Ensures that the required table columns exist.
     Returns the database connection object or None if the connection fails.
     """
     try:
+        # Debug prints to verify environment variables
+        print("DB_HOST:", os.getenv("DB_HOST", "localhost"))
+        print("DB_USER:", os.getenv("DB_USER", "root"))
+        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", ""))
+        print("DB_NAME:", os.getenv("DB_NAME", "movieverse_db"))
+
         conn = mysql.connector.connect(
-            host=st.secrets["DB_HOST"],
-            user=st.secrets["DB_USER"],
-            password=st.secrets["DB_PASSWORD"],
-            database=st.secrets["DB_NAME"],
-            connection_timeout=20
+            host=os.getenv("DB_HOST", "localhost"),
+            user=os.getenv("DB_USER", "root"),
+            password=os.getenv("DB_PASSWORD", ""),
+            database=os.getenv("DB_NAME", "movieverse_db"),
+            connection_timeout=20  # Increased the timeout for the connection
         )
         ensure_table_columns_exist(conn)
         return conn
     except mysql.connector.Error as err:
-        st.error("Database connection error:")
-        st.code(str(err), language="text")
+        print(f"Error: {err}")
+        print("Check if the MySQL server is running and the environment variables are set correctly.")
         return None
 
 def ensure_table_columns_exist(conn):
@@ -29,7 +34,7 @@ def ensure_table_columns_exist(conn):
     Adds any missing columns to the table.
     """
     if conn is None:
-        st.warning("No connection available to ensure table columns.")
+        print("No connection available to ensure table columns.")
         return
 
     cursor = conn.cursor()
@@ -50,35 +55,27 @@ def ensure_table_columns_exist(conn):
         "likes": "INT DEFAULT 0"
     }
 
-    try:
-        # Create table if it doesn't exist (with only the id column initially)
-        cursor.execute("""
-            CREATE TABLE IF NOT EXISTS movies (
-                id INT AUTO_INCREMENT PRIMARY KEY
-            );
-        """)
+    cursor.execute("""
+        CREATE TABLE IF NOT EXISTS movies (
+            id INT AUTO_INCREMENT PRIMARY KEY
+        );
+    """)
 
-        # Check existing columns
-        cursor.execute("SHOW COLUMNS FROM movies")
-        existing_columns = {row[0] for row in cursor.fetchall()}
+    cursor.execute("SHOW COLUMNS FROM movies")
+    existing_columns = {row[0] for row in cursor.fetchall()}
 
-        # Add missing columns
-        for column, data_type in required_columns.items():
-            if column not in existing_columns:
-                alter_query = f"ALTER TABLE movies ADD COLUMN {column} {data_type};"
-                cursor.execute(alter_query)
-                st.info(f"Added missing column: {column}")
+    for column, data_type in required_columns.items():
+        if column not in existing_columns:
+            alter_query = f"ALTER TABLE movies ADD COLUMN {column} {data_type};"
+            cursor.execute(alter_query)
+            print(f"Added missing column: {column}")
 
-        conn.commit()
-        st.success("Database structure verified and updated successfully.")
-    except mysql.connector.Error as err:
-        st.error("Error while ensuring table columns:")
-        st.code(str(err), language="text")
-    finally:
-        cursor.close()
+    conn.commit()
+    cursor.close()
+    print("Database structure verified and updated.")
 
-# Optional for local testing or debugging
 if __name__ == "__main__":
+    # Run the function to ensure the database is properly structured
     conn = get_db_connection()
     if conn:
         conn.close()
