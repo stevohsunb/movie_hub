@@ -25,7 +25,7 @@ def get_db_connection():
         )
         ensure_table_columns_exist(conn)
         return conn
-   except mysql.connector.Error as err:
+    except mysql.connector.Error as err:
         print(f"Error: {err}")
         print("Check if the MySQL server is running and the environment variables are set correctly.")
         return None
