@@ -1,4 +1,6 @@
 import os
+import mysql
+import mysql.connector
 from mysql.connector.cursor import MySQLCursorDict
 
 def get_db_connection():
