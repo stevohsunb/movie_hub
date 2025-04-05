@@ -2,7 +2,6 @@ import os
 import mysql
 import mysql.connector
 from mysql.connector.cursor import MySQLCursorDict
-from mysql.connector import Error
 
 def get_db_connection():
     """
@@ -26,7 +25,7 @@ def get_db_connection():
         )
         ensure_table_columns_exist(conn)
         return conn
-   except Error as err:
+   except mysql.connector.Error as err:
         print(f"Error: {err}")
         print("Check if the MySQL server is running and the environment variables are set correctly.")
         return None
