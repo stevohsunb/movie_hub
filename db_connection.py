@@ -2,7 +2,6 @@ import os
 import mysql
 import mysql.connector
 from mysql.connector.cursor import MySQLCursorDict
-
 def get_db_connection():
     """
     Establish a database connection using environment variables for configuration.
@@ -10,17 +9,24 @@ def get_db_connection():
     Returns the database connection object or None if the connection fails.
     """
     try:
-        # Debug prints to verify environment variables
-        print("DB_HOST:", os.getenv("DB_HOST", "localhost"))
-        print("DB_USER:", os.getenv("DB_USER", "root"))
-        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", ""))
-        print("DB_NAME:", os.getenv("DB_NAME", "movieverse_db"))
+        # Fetch environment variables
+        db_host = os.getenv("DB_HOST", "localhost")
+        db_user = os.getenv("DB_USER", "root")
+        db_password = os.getenv("DB_PASSWORD", "")
+        db_name = os.getenv("DB_NAME", "movieverse_db")
 
+        # Debug prints to verify environment variables
+        print(f"DB_HOST: {db_host}")
+        print(f"DB_USER: {db_user}")
+        print(f"DB_PASSWORD: {'***' if db_password else ''}")
+        print(f"DB_NAME: {db_name}")
+
+        # Establish connection
         conn = mysql.connector.connect(
-            host=os.getenv("DB_HOST", "localhost"),
-            user=os.getenv("DB_USER", "root"),
-            password=os.getenv("DB_PASSWORD", ""),
-            database=os.getenv("DB_NAME", "movieverse_db"),
+            host=db_host,
+            user=db_user,
+            password=db_password,
+            database=db_name,
             connection_timeout=20  # Increased the timeout for the connection
         )
         ensure_table_columns_exist(conn)
@@ -81,3 +87,4 @@ if __name__ == "__main__":
     conn = get_db_connection()
     if conn:
         conn.close()
+      
