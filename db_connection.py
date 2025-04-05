@@ -27,7 +27,7 @@ def get_db_connection():
             user=db_user,
             password=db_password,
             database=db_name,
-            connection_timeout=20  # Increased the timeout for the connection
+            connection_timeout=100  # Increased the timeout for the connection
         )
         ensure_table_columns_exist(conn)
         return conn
