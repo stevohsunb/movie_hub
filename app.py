@@ -88,6 +88,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Admin login function
+  # Ensure this import is correct
 def login():
     st.title("Admin Login")
     
@@ -96,7 +97,7 @@ def login():
     
     if st.button("Login"):
         conn = get_db_connection()
-        cursor = conn.cursor(cursor_class=MySQLCursorDict)
+        cursor = conn.cursor(dictionary=True)  # Use dictionary=True instead of cursor_class
         
         query = "SELECT * FROM admins WHERE username=%s AND password=%s"
         cursor.execute(query, (username, password))
