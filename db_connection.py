@@ -9,6 +9,12 @@ def get_db_connection():
     Returns the database connection object or None if the connection fails.
     """
     try:
+        # Debug prints to verify environment variables
+        print("DB_HOST:", os.getenv("DB_HOST", "localhost"))
+        print("DB_USER:", os.getenv("DB_USER", "root"))
+        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", ""))
+        print("DB_NAME:", os.getenv("DB_NAME", "movieverse_db"))
+
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
             user=os.getenv("DB_USER", "root"),
