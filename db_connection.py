@@ -1,7 +1,13 @@
 import mysql.connector
 import os
+from mysql.connector.cursor import MySQLCursorDict
 
 def get_db_connection():
+    """
+    Establish a database connection using environment variables for configuration.
+    Ensures that the required table columns exist.
+    Returns the database connection object or None if the connection fails.
+    """
     try:
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "localhost"),
@@ -18,12 +24,16 @@ def get_db_connection():
         return None
 
 def ensure_table_columns_exist(conn):
+    """
+    Ensures that the required columns exist in the 'movies' table.
+    Adds any missing columns to the table.
+    """
     if conn is None:
         print("No connection available to ensure table columns.")
         return
 
     cursor = conn.cursor()
-
+    
     required_columns = {
         "id": "INT AUTO_INCREMENT PRIMARY KEY",
         "title": "VARCHAR(255) NOT NULL",
@@ -59,7 +69,8 @@ def ensure_table_columns_exist(conn):
     cursor.close()
     print("Database structure verified and updated.")
 
-# Run the function to ensure the database is properly structured
-conn = get_db_connection()
-if conn:
-    conn.close()
+if __name__ == "__main__":
+    # Run the function to ensure the database is properly structured
+    conn = get_db_connection()
+    if conn:
+        conn.close()
