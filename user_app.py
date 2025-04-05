@@ -1,7 +1,7 @@
 import streamlit as st
 import mysql.connector
 from db_connection import get_db_connection
-
+from mysql.connector.cursor import MySQLCursorDict
 # Set page config
 st.set_page_config(page_title="MovieVerse", page_icon="🎬", layout="wide")
 
@@ -85,27 +85,23 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # Fetching movies data from the database
-def fetch_movies(sort_option, search_query=None):
+
+def fetch_movies(sort_option, search_query):
     conn = get_db_connection()
-    cursor = conn.cursor(dictionary=True)
-    
-    if search_query:
-        query = f"SELECT * FROM movies WHERE title LIKE %s"
-        cursor.execute(query, ('%' + search_query + '%',))
-    else:
-        if sort_option == "Most Watched":
-            query = "SELECT * FROM movies ORDER BY views DESC"
-        elif sort_option == "Newest":
-            query = "SELECT * FROM movies ORDER BY upload_date DESC"
-        else:
-            query = "SELECT * FROM movies"
-        cursor.execute(query)
-    
+    if conn is None:
+        print("Failed to establish a database connection.")
+        return []
+
+    cursor = conn.cursor(cursor_class=MySQLCursorDict)
+
+    query = "SELECT * FROM movies WHERE title LIKE %s ORDER BY %s"
+    cursor.execute(query, (f"%{search_query}%", sort_option))
     movies = cursor.fetchall()
+    cursor.close()
     conn.close()
-    
     return movies
 
+# Other parts of user_app.py
 # Updating views count in the database
 def update_views(movie_id):
     conn = get_db_connection()
