@@ -4,7 +4,6 @@ import mysql
 import mysql.connector
 from db_connection import get_db_connection
 from mysql.connector.cursor import MySQLCursorDict
-
 st.set_page_config(page_title="Admin Panel", page_icon="🎬", layout="wide")
 
 # Inject custom CSS styles for better visuals
@@ -132,15 +131,14 @@ if st.session_state.get("logged_in"):
     st.write("Manage your movie uploads and videos here.")
     
     # Fetch movies from the database
-    def fetch_movies():
-        conn = get_db_connection()
-        if conn:
-            cursor = conn.cursor(cursor_class=MySQLCursorDict)
-            cursor.execute("SELECT * FROM movies ORDER BY upload_date DESC")
-            movies = cursor.fetchall()
-            cursor.close()
-            conn.close()
-            return movies
+def fetch_movies():
+    conn = get_db_connection()
+    cursor = conn.cursor(dictionary=True)  # 🔄 Change is here
+    cursor.execute("SELECT * FROM movies ORDER BY upload_date DESC")
+    movies = cursor.fetchall()
+    conn.close()
+    return movies
+
         else:
             st.error("Failed to connect to the database. Please check your connection settings.")
             return []
