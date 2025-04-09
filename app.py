@@ -139,7 +139,7 @@ def fetch_movies():
     conn.close()
     return movies
 
-        else:
+else:
             st.error("Failed to connect to the database. Please check your connection settings.")
             return []
 
