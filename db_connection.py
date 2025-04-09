@@ -11,10 +11,10 @@ def get_db_connection():
     """
     try:
         # Debug prints to verify environment variables
-        print("DB_HOST:", os.getenv("DB_HOST", "localhost"))
-        print("DB_USER:", os.getenv("DB_USER", "root"))
-        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", ""))
-        print("DB_NAME:", os.getenv("DB_NAME", "movieverse_db"))
+        print("DB_HOST:", os.getenv("DB_HOST", "sql12.freesqldatabase.com"))
+        print("DB_USER:", os.getenv("DB_USER", "sql12771373"))
+        print("DB_PASSWORD:", os.getenv("DB_PASSWORD", "s5xLzgwGbt"))
+        print("DB_NAME:", os.getenv("DB_NAME", "sql12771373"))
 
         conn = mysql.connector.connect(
             host=os.getenv("DB_HOST", "sql12.freesqldatabase.com"),
